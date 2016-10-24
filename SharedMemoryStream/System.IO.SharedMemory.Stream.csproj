@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <Import Project="$(SolutionDir)\SharedMemory.PreSettings.targets" />
+  <PropertyGroup>
+    <ProjectGuid>{DFA407A8-AEA8-48BB-AE6C-709DF51D276F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>System.IO.SharedMemory.Stream</RootNamespace>
+    <AssemblyName>System.IO.SharedMemory.Stream</AssemblyName>
+    <DocumentationFile>$(AssemblyName).XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(APPVEYOR)' == 'True' ">
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(StrongNameKeyPath)</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(APPVEYOR)' == '' ">
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>publickey.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="SharedMemoryStream.cs" />
+    <Compile Include="IO\SharedMemoryStreamReader.cs" />
+    <Compile Include="IO\SharedMemoryStreamWrapper.cs" />
+    <Compile Include="IO\SharedMemoryStreamWriter.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Threading\DynamicSpin.cs" />
+    <Compile Include="Threading\Worker.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SharedMemory.licenseheader" />
+    <None Include="SharedMemory.nuspec" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\lib\NetSerializer.Library\NetSerializer\NetSerializer.csproj">
+      <Project>{85a11d07-8d18-42d5-accf-ef9744efe825}</Project>
+      <Name>NetSerializer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\lib\SharedMemory.Library\SharedMemory\System.IO.SharedMemory.csproj">
+      <Project>{5c584c6b-dac3-454c-8ce6-1f95fe3e9ff9}</Project>
+      <Name>System.IO.SharedMemory</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\lib\Task.Parallel.Library.Net35\System.Threading.Tasks.Net35.csproj">
+      <Project>{dcb5d745-525c-46a1-bfc0-e12f87ab6165}</Project>
+      <Name>System.Threading.Tasks.Net35</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
