@@ -1,0 +1,286 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>SingleProcess</name>
+    </assembly>
+    <members>
+        <member name="T:CommandLine.ArgumentType">
+            <summary>
+            Used to control parsing of command line arguments.
+            </summary>
+        </member>
+        <member name="F:CommandLine.ArgumentType.Required">
+            <summary>
+            Indicates that this field is required. An error will be displayed
+            if it is not present when parsing arguments.
+            </summary>
+        </member>
+        <member name="F:CommandLine.ArgumentType.Unique">
+            <summary>
+            Only valid in conjunction with Multiple.
+            Duplicate values will result in an error.
+            </summary>
+        </member>
+        <member name="F:CommandLine.ArgumentType.Multiple">
+            <summary>
+            Inidicates that the argument may be specified more than once.
+            Only valid if the argument is a collection
+            </summary>
+        </member>
+        <member name="F:CommandLine.ArgumentType.AtMostOnce">
+            <summary>
+            The default type for non-collection arguments.
+            The argument is not required, but an error will be reported if it is specified more than once.
+            </summary>
+        </member>
+        <member name="F:CommandLine.ArgumentType.LastOccurenceWins">
+            <summary>
+            For non-collection arguments, when the argument is specified more than
+            once no error is reported and the value of the argument is the last
+            value which occurs in the argument list.
+            </summary>
+        </member>
+        <member name="F:CommandLine.ArgumentType.MultipleUnique">
+            <summary>
+            The default type for collection arguments.
+            The argument is permitted to occur multiple times, but duplicate 
+            values will cause an error to be reported.
+            </summary>
+        </member>
+        <member name="T:CommandLine.ArgumentAttribute">
+            <summary>
+            Allows control of command line parsing.
+            Attach this attribute to instance fields of types used
+            as the destination of command line argument parsing.
+            </summary>
+        </member>
+        <member name="M:CommandLine.ArgumentAttribute.#ctor(CommandLine.ArgumentType)">
+            <summary>
+            Allows control of command line parsing.
+            </summary>
+            <param name="type"> Specifies the error checking to be done on the argument. </param>
+        </member>
+        <member name="P:CommandLine.ArgumentAttribute.Type">
+            <summary>
+            The error checking to be done on the argument.
+            </summary>
+        </member>
+        <member name="P:CommandLine.ArgumentAttribute.DefaultShortName">
+            <summary>
+            Returns true if the argument did not have an explicit short name specified.
+            </summary>
+        </member>
+        <member name="P:CommandLine.ArgumentAttribute.ShortName">
+            <summary>
+            The short name of the argument.
+            Set to null means use the default short name if it does not
+            conflict with any other parameter name.
+            Set to String.Empty for no short name.
+            This property should not be set for DefaultArgumentAttributes.
+            </summary>
+        </member>
+        <member name="P:CommandLine.ArgumentAttribute.DefaultLongName">
+            <summary>
+            Returns true if the argument did not have an explicit long name specified.
+            </summary>
+        </member>
+        <member name="P:CommandLine.ArgumentAttribute.LongName">
+            <summary>
+            The long name of the argument.
+            Set to null means use the default long name.
+            The long name for every argument must be unique.
+            It is an error to specify a long name of String.Empty.
+            </summary>
+        </member>
+        <member name="P:CommandLine.ArgumentAttribute.DefaultValue">
+            <summary>
+            The default value of the argument.
+            </summary>
+        </member>
+        <member name="P:CommandLine.ArgumentAttribute.HasDefaultValue">
+            <summary>
+            Returns true if the argument has a default value.
+            </summary>
+        </member>
+        <member name="P:CommandLine.ArgumentAttribute.HasHelpText">
+            <summary>
+            Returns true if the argument has help text specified.
+            </summary>
+        </member>
+        <member name="P:CommandLine.ArgumentAttribute.HelpText">
+            <summary>
+            The help text for the argument.
+            </summary>
+        </member>
+        <member name="T:CommandLine.DefaultArgumentAttribute">
+            <summary>
+            Indicates that this argument is the default argument.
+            '/' or '-' prefix only the argument value is specified.
+            The ShortName property should not be set for DefaultArgumentAttribute
+            instances. The LongName property is used for usage text only and
+            does not affect the usage of the argument.
+            </summary>
+        </member>
+        <member name="M:CommandLine.DefaultArgumentAttribute.#ctor(CommandLine.ArgumentType)">
+            <summary>
+            Indicates that this argument is the default argument.
+            </summary>
+            <param name="type"> Specifies the error checking to be done on the argument. </param>
+        </member>
+        <member name="T:CommandLine.ErrorReporter">
+            <summary>
+            A delegate used in error reporting.
+            </summary>
+        </member>
+        <member name="T:CommandLine.Parser">
+             <summary>
+             Parser for command line arguments.
+            
+             The parser specification is infered from the instance fields of the object
+             specified as the destination of the parse.
+             Valid argument types are: int, uint, string, bool, enums
+             Also argument types of Array of the above types are also valid.
+             
+             Error checking options can be controlled by adding a ArgumentAttribute
+             to the instance fields of the destination object.
+            
+             At most one field may be marked with the DefaultArgumentAttribute
+             indicating that arguments without a '-' or '/' prefix will be parsed as that argument.
+            
+             If not specified then the parser will infer default options for parsing each
+             instance field. The default long name of the argument is the field name. The
+             default short name is the first character of the long name. Long names and explicitly
+             specified short names must be unique. Default short names will be used provided that
+             the default short name does not conflict with a long name or an explicitly
+             specified short name.
+            
+             Arguments which are array types are collection arguments. Collection
+             arguments can be specified multiple times.
+             </summary>
+        </member>
+        <member name="F:CommandLine.Parser.NewLine">
+            <summary>
+            The System Defined new line string.
+            </summary>
+        </member>
+        <member name="M:CommandLine.Parser.#ctor">
+            <summary>
+            Don't ever call this.
+            </summary>
+        </member>
+        <member name="M:CommandLine.Parser.ParseArgumentsWithUsage(System.String[],System.Object)">
+            <summary>
+            Parses Command Line Arguments. Displays usage message to Console.Out
+            if /?, /help or invalid arguments are encounterd.
+            Errors are output on Console.Error.
+            Use ArgumentAttributes to control parsing behaviour.
+            </summary>
+            <param name="arguments"> The actual arguments. </param>
+            <param name="destination"> The resulting parsed arguments. </param>
+            <returns> true if no errors were detected. </returns>
+        </member>
+        <member name="M:CommandLine.Parser.ParseArguments(System.String[],System.Object)">
+            <summary>
+            Parses Command Line Arguments. 
+            Errors are output on Console.Error.
+            Use ArgumentAttributes to control parsing behaviour.
+            </summary>
+            <param name="arguments"> The actual arguments. </param>
+            <param name="destination"> The resulting parsed arguments. </param>
+            <returns> true if no errors were detected. </returns>
+        </member>
+        <member name="M:CommandLine.Parser.ParseArguments(System.String[],System.Object,CommandLine.ErrorReporter)">
+            <summary>
+            Parses Command Line Arguments. 
+            Use ArgumentAttributes to control parsing behaviour.
+            </summary>
+            <param name="arguments"> The actual arguments. </param>
+            <param name="destination"> The resulting parsed arguments. </param>
+            <param name="reporter"> The destination for parse errors. </param>
+            <returns> true if no errors were detected. </returns>
+        </member>
+        <member name="M:CommandLine.Parser.ParseHelp(System.String[])">
+            <summary>
+            Checks if a set of arguments asks for help.
+            </summary>
+            <param name="args"> Args to check for help. </param>
+            <returns> Returns true if args contains /? or /help. </returns>
+        </member>
+        <member name="M:CommandLine.Parser.ArgumentsUsage(System.Type)">
+            <summary>
+            Returns a Usage string for command line argument parsing.
+            Use ArgumentAttributes to control parsing behaviour.
+            Formats the output to the width of the current console window.
+            </summary>
+            <param name="argumentType"> The type of the arguments to display usage for. </param>
+            <returns> Printable string containing a user friendly description of command line arguments. </returns>
+        </member>
+        <member name="M:CommandLine.Parser.ArgumentsUsage(System.Type,System.Int32)">
+            <summary>
+            Returns a Usage string for command line argument parsing.
+            Use ArgumentAttributes to control parsing behaviour.
+            </summary>
+            <param name="argumentType"> The type of the arguments to display usage for. </param>
+            <param name="columns"> The number of columns to format the output to. </param>
+            <returns> Printable string containing a user friendly description of command line arguments. </returns>
+        </member>
+        <member name="M:CommandLine.Parser.GetConsoleWindowWidth">
+            <summary>
+            Returns the number of columns in the current console window
+            </summary>
+            <returns>Returns the number of columns in the current console window</returns>
+        </member>
+        <member name="M:CommandLine.Parser.IndexOf(System.Text.StringBuilder,System.Char,System.Int32)">
+            <summary>
+            Searches a StringBuilder for a character
+            </summary>
+            <param name="text"> The text to search. </param>
+            <param name="value"> The character value to search for. </param>
+            <param name="startIndex"> The index to stat searching at. </param>
+            <returns> The index of the first occurence of value or -1 if it is not found. </returns>
+        </member>
+        <member name="M:CommandLine.Parser.LastIndexOf(System.Text.StringBuilder,System.Char,System.Int32)">
+            <summary>
+            Searches a StringBuilder for a character in reverse
+            </summary>
+            <param name="text"> The text to search. </param>
+            <param name="value"> The character to search for. </param>
+            <param name="startIndex"> The index to start the search at. </param>
+            <returns>The index of the last occurence of value in text or -1 if it is not found. </returns>
+        </member>
+        <member name="M:CommandLine.Parser.#ctor(System.Type,CommandLine.ErrorReporter)">
+            <summary>
+            Creates a new command line argument parser.
+            </summary>
+            <param name="argumentSpecification"> The type of object to  parse. </param>
+            <param name="reporter"> The destination for parse errors. </param>
+        </member>
+        <member name="M:CommandLine.Parser.ParseArgumentList(System.String[],System.Object)">
+            <summary>
+            Parses an argument list into an object
+            </summary>
+            <param name="args"></param>
+            <param name="destination"></param>
+            <returns> true if an error occurred </returns>
+        </member>
+        <member name="M:CommandLine.Parser.Parse(System.String[],System.Object)">
+            <summary>
+            Parses an argument list.
+            </summary>
+            <param name="args"> The arguments to parse. </param>
+            <param name="destination"> The destination of the parsed arguments. </param>
+            <returns> true if no parse errors were encountered. </returns>
+        </member>
+        <member name="M:CommandLine.Parser.GetUsageString(System.Int32)">
+            <summary>
+            A user firendly usage string describing the command line argument syntax.
+            </summary>
+        </member>
+        <member name="P:CommandLine.Parser.HasDefaultArgument">
+            <summary>
+            Does this parser have a default argument.
+            </summary>
+            <value> Does this parser have a default argument. </value>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,11 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/FFFF0h/SharedMemory.Library
+	branch = master
+	commit = 344e8c91b291313f2d08970d1ebcbebcf6cdc828
+	parent = 6e62812bce91418b66a88aedfaba8f16c308fd4b
+	cmdver = 0.3.0
