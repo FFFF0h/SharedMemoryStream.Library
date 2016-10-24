@@ -3,7 +3,7 @@
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <Import Project="$(SolutionDir)\SharedMemory.PreSettings.targets" />
   <PropertyGroup>
-    <ProjectGuid>{DFA407A8-AEA8-48BB-AE6C-709DF51D276F}</ProjectGuid>
+    <ProjectGuid>{5C584C6B-DAC3-454C-8CE6-1F95FE3E9FF9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.IO.SharedMemory</RootNamespace>
     <AssemblyName>System.IO.SharedMemory</AssemblyName>
