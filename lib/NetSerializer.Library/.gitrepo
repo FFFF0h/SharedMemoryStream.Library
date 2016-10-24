@@ -1,0 +1,11 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/FFFF0h/NetSerializer.Library
+	branch = master
+	commit = 6cd810b75cef7e2776594106fe991fc0c6b37993
+	parent = fb1aaf81f9f2ea19c3b0203774c016309c3aff5c
+	cmdver = 0.3.0

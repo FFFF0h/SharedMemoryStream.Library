@@ -1,0 +1,11 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/FFFF0h/System.Core.Net35
+	branch = master
+	commit = 0366bfa17f7267569b74fd5d99708a6e4a818851
+	parent = 92f3125e9befc15bb91d5f25be5bab5ac817b85a
+	cmdver = 0.3.0
