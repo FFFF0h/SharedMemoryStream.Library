@@ -18,7 +18,7 @@
     <AssemblyOriginatorKeyFile>publickey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile />
+    <AssemblyOriginatorKeyFile>SharedMemory.Stream.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -40,6 +40,7 @@
   <ItemGroup>
     <None Include="SharedMemory.licenseheader" />
     <None Include="SharedMemory.nuspec" />
+    <None Include="SharedMemory.Stream.snk" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\lib\NetSerializer.Library\NetSerializer\NetSerializer.csproj">
