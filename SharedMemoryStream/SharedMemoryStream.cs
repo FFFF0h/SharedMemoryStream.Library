@@ -324,12 +324,12 @@ namespace System.IO.SharedMemory
                         offset += rd;
                         red += rd;
 
-                        // Reads timeout
-                        if (sw.ElapsedMilliseconds > _readTimeout)
-                        {
-                            hasTimedOut = true;
-                            break;
-                        }
+                        //// Reads timeout
+                        //if (sw.ElapsedMilliseconds > _readTimeout)
+                        //{
+                        //    hasTimedOut = true;
+                        //    break;
+                        //}
 #if DEBUG                            
                         Debug.WriteLine(DateTime.Now.ToLongTimeString() + " - Reading: " + rd + " bytes, free nodes: " + _circularBuffer.FreeNodeCount, "Debug");
 #endif
@@ -417,11 +417,11 @@ namespace System.IO.SharedMemory
                         written += wr;
 
                         // Writes timeout
-                        if (sw.ElapsedMilliseconds > _writeTimeout)
-                        {
-                            hasTimedOut = true;
-                            break;
-                        }
+                        //if (sw.ElapsedMilliseconds > _writeTimeout)
+                        //{
+                        //    hasTimedOut = true;
+                        //    break;
+                        //}
 
 #if DEBUG
                         Debug.WriteLine(DateTime.Now.ToLongTimeString() + " - Writing: " + wr + " bytes, free nodes: " + _circularBuffer.FreeNodeCount, "Debug");

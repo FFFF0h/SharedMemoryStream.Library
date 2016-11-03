@@ -252,7 +252,7 @@ namespace SharedMemoryStreamTests
                     Task tWriter = Task.Factory.StartNew(wt);
                     Task tReader = Task.Factory.StartNew(rd);
 
-                    if (!Task.WaitAll(new Task[] { tWriter, tReader }, 60000))
+                    if (!Task.WaitAll(new Task[] { tWriter, tReader }, 1200000))
                     {
                         Assert.Fail("Reader or writer took too long");
                     }
