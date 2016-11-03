@@ -306,7 +306,7 @@ namespace System.IO.SharedMemory
                 throw new NotSupportedException("Read is not supported.");
 
             int red = 0;
-            bool hasTimedOut = false;
+            //bool hasTimedOut = false;
 
             // Enter critial path
             Thread.BeginCriticalRegion();
@@ -316,8 +316,8 @@ namespace System.IO.SharedMemory
             {    
                 try
                 {
-                    Stopwatch sw = new Stopwatch();
-                    sw.Start();
+                    //Stopwatch sw = new Stopwatch();
+                    //sw.Start();
                     while (red < count && _circularBuffer.HasNodeToRead && !_circularBuffer.ShuttingDown)
                     {
                         int rd = _circularBuffer.Read(buffer, offset, _readTimeout);
@@ -330,11 +330,8 @@ namespace System.IO.SharedMemory
                         //    hasTimedOut = true;
                         //    break;
                         //}
-#if DEBUG                            
-                        Debug.WriteLine(DateTime.Now.ToLongTimeString() + " - Reading: " + rd + " bytes, free nodes: " + _circularBuffer.FreeNodeCount, "Debug");
-#endif
                     }
-                    sw.Stop();
+                    //sw.Stop();
                 }
                 finally
                 {
@@ -344,8 +341,8 @@ namespace System.IO.SharedMemory
             }
             Thread.EndCriticalRegion();
 
-            if (hasTimedOut)
-                throw new TimeoutException(string.Format("Waited {0} miliseconds", _readTimeout));
+            //if (hasTimedOut)
+            //    throw new TimeoutException(string.Format("Waited {0} miliseconds", _readTimeout));
 
 
 #if DEBUG
@@ -397,7 +394,7 @@ namespace System.IO.SharedMemory
             Debug.WriteLine("Buffer to write: " + tempBuffer.Length + " bytes, Free space available: " + _circularBuffer.FreeNodeCount + "x" + _circularBuffer.NodeBufferSize + "=" + freeSize + " bytes", "Information");
 #endif
 
-            bool hasTimedOut = false;
+            //bool hasTimedOut = false;
 
             // Enter critial path
             Thread.BeginCriticalRegion();
@@ -408,8 +405,8 @@ namespace System.IO.SharedMemory
                 try
                 {
                     // Writes into the buffer, if the buffer is full, it will wait until new node are freed.
-                    Stopwatch sw = new Stopwatch();
-                    sw.Start();
+                    //Stopwatch sw = new Stopwatch();
+                    //sw.Start();
                     while (written < toWrite && !_circularBuffer.ShuttingDown)
                     {
                         int wr = _circularBuffer.Write(tempBuffer, offset, _readTimeout);
@@ -422,12 +419,8 @@ namespace System.IO.SharedMemory
                         //    hasTimedOut = true;
                         //    break;
                         //}
-
-#if DEBUG
-                        Debug.WriteLine(DateTime.Now.ToLongTimeString() + " - Writing: " + wr + " bytes, free nodes: " + _circularBuffer.FreeNodeCount, "Debug");
-#endif
                     }
-                    sw.Stop();
+                    //sw.Stop();
                 }
                 finally
                 {
@@ -437,8 +430,8 @@ namespace System.IO.SharedMemory
             }
             Thread.EndCriticalRegion();
 
-            if (hasTimedOut)
-                throw new TimeoutException(string.Format("Waited {0} miliseconds", _readTimeout));
+            //if (hasTimedOut)
+            //    throw new TimeoutException(string.Format("Waited {0} miliseconds", _readTimeout));
 
 #if DEBUG
             if (written != 0)

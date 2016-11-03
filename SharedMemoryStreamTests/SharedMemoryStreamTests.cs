@@ -305,7 +305,7 @@ namespace SharedMemoryStreamTests
             Stream_Parallel_ReadWrite(10000);
             Stream_Parallel_ReadWrite(100000);
             Stream_Parallel_ReadWrite(1000000);
-            Stream_Parallel_ReadWrite(10000000);
+            //Stream_Parallel_ReadWrite(10000000);
         }
 
         [TestMethod]
