@@ -17,6 +17,9 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>publickey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
