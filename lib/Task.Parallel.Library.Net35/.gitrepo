@@ -6,6 +6,6 @@
 [subrepo]
 	remote = https://github.com/FFFF0h/Task.Parallel.Library.Net35
 	branch = master
-	commit = 4b149583d23bab26dc9b4bac8ef22d2161338d36
-	parent = 9198635ea9434664e9cb1b781e6759d6fb987ef1
+	commit = 11dd46972832eba9ea56cdd537dc205558e45b52
+	parent = 1c5512ee2a288d30ba7eb2709ddfd96e27ee29ff
 	cmdver = 0.3.0
