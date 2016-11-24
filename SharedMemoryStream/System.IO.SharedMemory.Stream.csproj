@@ -32,6 +32,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SharedMemoryClient.cs" />
+    <Compile Include="SharedMemoryConnection.cs" />
+    <Compile Include="SharedMemoryExceptionEventHandler.cs" />
+    <Compile Include="SharedMemoryServer.cs" />
     <Compile Include="SharedMemoryStream.cs" />
     <Compile Include="IO\SharedMemoryStreamReader.cs" />
     <Compile Include="IO\SharedMemoryStreamWrapper.cs" />

@@ -51,7 +51,7 @@ namespace System.IO
     /// </summary>
     /// <typeparam name="TRead">Reference type to <b>read</b> from the stream</typeparam>
     /// <typeparam name="TWrite">Reference type to <b>write</b> to the stream</typeparam>
-    public class SharedMemoryStreamWrapper<TRead, TWrite>
+    public class SharedMemoryStreamWrapper<TRead, TWrite> : IDisposable
         where TRead : class
         where TWrite : class
     {
@@ -145,6 +145,14 @@ namespace System.IO
         public void Close()
         {
             BaseStream.Close();
+        }
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        void IDisposable.Dispose()
+        {
+            Close();
         }
     }
 }

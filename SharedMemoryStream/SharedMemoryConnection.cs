@@ -13,10 +13,10 @@ using System.Collections.Concurrent;
 namespace System.IO.SharedMemory
 {
     /// <summary>
-    /// Represents a connection between a named pipe client and server.
+    /// Represents a connection between a shared memory client and server.
     /// </summary>
-    /// <typeparam name="TRead">Reference type to read from the named pipe</typeparam>
-    /// <typeparam name="TWrite">Reference type to write to the named pipe</typeparam>
+    /// <typeparam name="TRead">Reference type to read from the shared memory</typeparam>
+    /// <typeparam name="TWrite">Reference type to write to the shared memory</typeparam>
     public class SharedMemoryConnection<TRead, TWrite>
         where TRead : class
         where TWrite : class
@@ -32,28 +32,29 @@ namespace System.IO.SharedMemory
         public readonly string Name;
 
         /// <summary>
-        /// Gets a value indicating whether the pipe is connected or not.
+        /// Gets a value indicating whether the shared memory is connected or not.
         /// </summary>
         public bool IsConnected { get { return _streamWrapper.IsConnected; } }
 
         /// <summary>
-        /// Invoked when the named pipe connection terminates.
+        /// Invoked when the shared memory connection terminates.
         /// </summary>
         public event ConnectionEventHandler<TRead, TWrite> Disconnected;
 
         /// <summary>
-        /// Invoked whenever a message is received from the other end of the pipe.
+        /// Invoked whenever a message is received from the other end of the shared memory.
         /// </summary>
         public event ConnectionMessageEventHandler<TRead, TWrite> ReceiveMessage;
 
         /// <summary>
-        /// Invoked when an exception is thrown during any read/write operation over the named pipe.
+        /// Invoked when an exception is thrown during any read/write operation over the shared memory.
         /// </summary>
         public event ConnectionExceptionEventHandler<TRead, TWrite> Error;
 
         private readonly SharedMemoryStreamWrapper<TRead, TWrite> _streamWrapper;
 
         private readonly AutoResetEvent _writeSignal = new AutoResetEvent(false);
+
         /// <summary>
         /// To support Multithread, we should use BlockingCollection.
         /// </summary>
@@ -87,6 +88,12 @@ namespace System.IO.SharedMemory
 
         private bool _notifiedSucceeded;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SharedMemoryConnection{TRead, TWrite}"/> class.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <param name="name">The name.</param>
+        /// <param name="serverStream">The server stream.</param>
         internal SharedMemoryConnection(int id, string name, SharedMemoryStream serverStream)
         {
             Id = id;
@@ -95,7 +102,7 @@ namespace System.IO.SharedMemory
         }
 
         /// <summary>
-        /// Begins reading from and writing to the named pipe on a background thread.
+        /// Begins reading from and writing to the shared memory on a background thread.
         /// This method returns immediately.
         /// </summary>
         public void Open()
@@ -103,17 +110,17 @@ namespace System.IO.SharedMemory
             var readWorker = new Worker();
             readWorker.Succeeded += OnSucceeded;
             readWorker.Error += OnError;
-            readWorker.DoWork(ReadPipe);
+            readWorker.DoWork(ReadSharedMemory);
 
             var writeWorker = new Worker();
             writeWorker.Succeeded += OnSucceeded;
             writeWorker.Error += OnError;
-            writeWorker.DoWork(WritePipe);
+            writeWorker.DoWork(WriteSharedMemory);
         }
 
         /// <summary>
         /// Adds the specified <paramref name="message"/> to the write queue.
-        /// The message will be written to the named pipe by the background thread
+        /// The message will be written to the shared memory by the background thread
         /// at the next available opportunity.
         /// </summary>
         /// <param name="message"></param>
@@ -124,17 +131,9 @@ namespace System.IO.SharedMemory
         }
 
         /// <summary>
-        /// Closes the named pipe connection and underlying <c>PipeStream</c>.
+        /// Closes the connection and underlying <c>SharedMemoryStream</c>.
         /// </summary>
         public void Close()
-        {
-            CloseImpl();
-        }
-
-        /// <summary>
-        ///     Invoked on the background thread.
-        /// </summary>
-        private void CloseImpl()
         {
             _streamWrapper.Close();
             _writeSignal.Set();
@@ -169,7 +168,7 @@ namespace System.IO.SharedMemory
         ///     Invoked on the background thread.
         /// </summary>
         /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="TRead"/> is not marked as serializable.</exception>
-        private void ReadPipe()
+        private void ReadSharedMemory()
         {
 
             while (IsConnected && _streamWrapper.CanRead)
@@ -179,7 +178,7 @@ namespace System.IO.SharedMemory
                     var obj = _streamWrapper.ReadObject();
                     if (obj == null)
                     {
-                        CloseImpl();
+                        Close();
                         return;
                     }
                     if (ReceiveMessage != null)
@@ -187,7 +186,7 @@ namespace System.IO.SharedMemory
                 }
                 catch
                 {
-                    //we must igonre exception, otherwise, the namepipe wrapper will stop work.
+                    //we must igonre exception, otherwise, the wrapper will stop work.
                 }
             }
             
@@ -197,7 +196,7 @@ namespace System.IO.SharedMemory
         ///     Invoked on the background thread.
         /// </summary>
         /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="TWrite"/> is not marked as serializable.</exception>
-        private void WritePipe()
+        private void WriteSharedMemory()
         {
             
                 while (IsConnected && _streamWrapper.CanWrite)
@@ -214,7 +213,7 @@ namespace System.IO.SharedMemory
                     }
                     catch
                     {
-                    //we must igonre exception, otherwise, the namepipe wrapper will stop work.
+                    //we must igonre exception, otherwise, the wrapper will stop work.
                 }
             }
           
@@ -225,11 +224,11 @@ namespace System.IO.SharedMemory
     {
         private static int _lastId;
 
-        public static SharedMemoryConnection<TRead, TWrite> CreateConnection<TRead, TWrite>(SharedMemoryStream pipeStream)
+        public static SharedMemoryConnection<TRead, TWrite> CreateConnection<TRead, TWrite>(SharedMemoryStream sharedMemoryStream)
             where TRead : class
             where TWrite : class
         {
-            return new SharedMemoryConnection<TRead, TWrite>(++_lastId, "Client " + _lastId, pipeStream);
+            return new SharedMemoryConnection<TRead, TWrite>(++_lastId, "Client " + _lastId, sharedMemoryStream);
         }
     }
 

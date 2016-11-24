@@ -6,26 +6,26 @@ using System.Collections.Generic;
 namespace System.IO.SharedMemory
 {
     /// <summary>
-    /// Wraps a <see cref="NamedPipeServerStream"/> and provides multiple simultaneous client connection handling.
+    /// Wraps a <see cref="SharedMemoryStream"/> and provides multiple simultaneous client connection handling.
     /// </summary>
-    /// <typeparam name="TReadWrite">Reference type to read from and write to the named pipe</typeparam>
+    /// <typeparam name="TReadWrite">Reference type to read from and write to the shared memory</typeparam>
     public class SharedMemoryServer<TReadWrite> : SharedMemoryServer<TReadWrite, TReadWrite> where TReadWrite : class
     {
         /// <summary>
-        /// Constructs a new <c>NamedPipeServer</c> object that listens for client connections on the given <paramref name="pipeName"/>.
+        /// Constructs a new <c>SharedMemoryServer</c> object that listens for client connections on the given <paramref name="name"/>.
         /// </summary>
-        /// <param name="pipeName">Name of the pipe to listen on</param>
-        public SharedMemoryServer(string pipeName)
-            : base(pipeName)
+        /// <param name="name">Name of the shared memory to listen on</param>
+        public SharedMemoryServer(string name)
+            : base(name)
         {
         }
     }
 
     /// <summary>
-    /// Wraps a <see cref="NamedPipeServerStream"/> and provides multiple simultaneous client connection handling.
+    /// Wraps a <see cref="SharedMemoryStream"/> and provides multiple simultaneous client connection handling.
     /// </summary>
-    /// <typeparam name="TRead">Reference type to read from the named pipe</typeparam>
-    /// <typeparam name="TWrite">Reference type to write to the named pipe</typeparam>
+    /// <typeparam name="TRead">Reference type to read from the shared memory</typeparam>
+    /// <typeparam name="TWrite">Reference type to write to the shared memory</typeparam>
     public class SharedMemoryServer<TRead, TWrite>
         where TRead : class
         where TWrite : class
@@ -50,10 +50,10 @@ namespace System.IO.SharedMemory
         /// </summary>
         public event SharedMemoryExceptionEventHandler Error;
 
-        private readonly string _pipeName;
+        private readonly string _name;
         private readonly List<SharedMemoryConnection<TRead, TWrite>> _connections = new List<SharedMemoryConnection<TRead, TWrite>>();
 
-        private int _nextPipeId;
+        private int _nextId;
 
         private volatile bool _shouldKeepRunning;
 #pragma warning disable 414
@@ -61,12 +61,12 @@ namespace System.IO.SharedMemory
 #pragma warning restore 414
 
         /// <summary>
-        /// Constructs a new <c>NamedPipeServer</c> object that listens for client connections on the given <paramref name="pipeName" />.
+        /// Constructs a new <c>SharedMemoryServer</c> object that listens for client connections on the given <paramref name="name" />.
         /// </summary>
-        /// <param name="pipeName">Name of the pipe to listen on.</param>
-        public SharedMemoryServer(string pipeName)
+        /// <param name="name">Name of the shared memory to listen on.</param>
+        public SharedMemoryServer(string name)
         {
-            _pipeName = pipeName;
+            _name = name;
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace System.IO.SharedMemory
             // If background thread is still listening for a client to connect,
             // initiate a dummy connection that will allow the thread to exit.
             //dummy connection will use the local server name.
-            var dummyClient = new SharedMemoryClient<TRead, TWrite>(_pipeName, ".");
+            var dummyClient = new SharedMemoryClient<TRead, TWrite>(_name, ".");
             dummyClient.Start();
             dummyClient.WaitForConnection(TimeSpan.FromSeconds(2));
             dummyClient.Stop();
@@ -146,34 +146,34 @@ namespace System.IO.SharedMemory
             _isRunning = true;
             while (_shouldKeepRunning)
             {
-                WaitForConnection(_pipeName);
+                WaitForConnection(_name);
             }
             _isRunning = false;
         }
 
-        private void WaitForConnection(string pipeName)
+        private void WaitForConnection(string name)
         {
-            NamedPipeServerStream handshakePipe = null;
-            NamedPipeServerStream dataPipe = null;
+            SharedMemoryStream data = null;
             SharedMemoryConnection<TRead, TWrite> connection = null;
 
-            var connectionPipeName = GetNextConnectionPipeName(pipeName);
+            var connectionName = GetNextConnectionName(name);
 
             try
             {
-                // Send the client the name of the data pipe to use
-                handshakePipe = SharedMemoryServerFactory.CreateAndConnectPipe(pipeName, pipeSecurity);
-                var handshakeWrapper = new SharedMemoryStreamWrapper<string, string>(handshakePipe);
-                handshakeWrapper.WriteObject(connectionPipeName);
-                handshakeWrapper.WaitForSharedMemoryDrain();
-                handshakeWrapper.Close();
+                // Send the client the name of the data channel to use
+                using (SharedMemoryStream handshake = new SharedMemoryStream(name, 3, 4096))
+                using (SharedMemoryStreamWrapper<string> handshakeWrapper = new SharedMemoryStreamWrapper<string>(handshake))
+                {
+                    handshakeWrapper.WriteObject(connectionName);
+                    handshakeWrapper.WaitForSharedMemoryDrain();
+                }
 
                 // Wait for the client to connect to the data pipe
-                dataPipe = SharedMemoryServerFactory.CreatePipe(connectionPipeName, pipeSecurity);
-                dataPipe.WaitForConnection();
+                data = SharedMemoryServerFactory.Create(connectionName);
+                data.WaitForConnection();
 
                 // Add the client's connection to the list of connections
-                connection = SharedMemoryConnectionFactory.CreateConnection<TRead, TWrite>(dataPipe);
+                connection = SharedMemoryConnectionFactory.CreateConnection<TRead, TWrite>(data);
                 connection.ReceiveMessage += ClientOnReceiveMessage;
                 connection.Disconnected += ClientOnDisconnected;
                 connection.Error += ConnectionOnError;
@@ -191,8 +191,8 @@ namespace System.IO.SharedMemory
             {
                 Console.Error.WriteLine("Named pipe is broken or disconnected: {0}", e);
 
-                Cleanup(handshakePipe);
-                Cleanup(dataPipe);
+                Cleanup(handshake);
+                Cleanup(data);
 
                 ClientOnDisconnected(connection);
             }
@@ -242,15 +242,15 @@ namespace System.IO.SharedMemory
                 Error(exception);
         }
 
-        private string GetNextConnectionPipeName(string pipeName)
+        private string GetNextConnectionName(string name)
         {
-            return string.Format("{0}_{1}", pipeName, ++_nextPipeId);
+            return string.Format("{0}_{1}", name, ++_nextId);
         }
 
-        private static void Cleanup(NamedPipeServerStream pipe)
+        private static void Cleanup(SharedMemoryStream stream)
         {
-            if (pipe == null) return;
-            using (var x = pipe)
+            if (stream == null) return;
+            using (var x = stream)
             {
                 x.Close();
             }
@@ -261,16 +261,16 @@ namespace System.IO.SharedMemory
 
     static class SharedMemoryServerFactory
     {
-        public static NamedPipeServerStream CreateAndConnectPipe(string pipeName, PipeSecurity pipeSecurity)
+        public static SharedMemoryStream CreateAndConnect(string name)
         {
-            var pipe = CreatePipe(pipeName, pipeSecurity);
-            pipe.WaitForConnection();
-            return pipe;
+            var sms = Create(name);
+            sms.WaitForConnection();
+            return sms;
         }
 
-        public static NamedPipeServerStream CreatePipe(string pipeName, PipeSecurity pipeSecurity)
+        public static SharedMemoryStream Create(string name)
         {
-            return new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough, 0, 0, pipeSecurity);
+            return new SharedMemoryStream(name);
         }
     }
 }

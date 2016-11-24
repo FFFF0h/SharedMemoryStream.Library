@@ -18,7 +18,8 @@ namespace System.IO.SharedMemory
         /// </summary>
         /// <param name="pipeName">Name of the server's pipe</param>
         /// <param name="serverName">server name default is local.</param>
-        public SharedMemoryClient(string pipeName,string serverName=".") : base(pipeName, serverName)
+        public SharedMemoryClient(string pipeName, string serverName = ".")
+            : base(pipeName, serverName)
         {
         }
     }
@@ -71,7 +72,7 @@ namespace System.IO.SharedMemory
         /// </summary>
         /// <param name="pipeName">Name of the server's pipe</param>
         /// <param name="serverName">the Name of the server, default is  local machine</param>
-        public SharedMemoryClient(string pipeName,string serverName)
+        public SharedMemoryClient(string pipeName, string serverName)
         {
             _pipeName = pipeName;
             _serverName = serverName;
@@ -170,16 +171,16 @@ namespace System.IO.SharedMemory
 
         private void ListenSync()
         {
-            // Get the name of the data pipe that should be used from now on by this NamedPipeClient
-            var handshake = SharedMemoryClientFactory.Connect<string, string>(_pipeName,_serverName);
-            var dataPipeName = handshake.ReadObject();
+            // Get the name of the data channel that should be used from now on by this.
+            var handshake = SharedMemoryClientFactory.Connect<string, string>(_pipeName);
+            var dataName = handshake.ReadObject();
             handshake.Close();
 
             // Connect to the actual data pipe
-            var dataPipe = SharedMemoryClientFactory.CreateAndConnectPipe(dataPipeName,_serverName);
+            var data = SharedMemoryClientFactory.CreateAndConnect(dataName);
 
             // Create a Connection object for the data pipe
-            _connection = SharedMemoryConnectionFactory.CreateConnection<TRead, TWrite>(dataPipe);
+            _connection = SharedMemoryConnectionFactory.CreateConnection<TRead, TWrite>(data);
             _connection.Disconnected += OnDisconnected;
             _connection.ReceiveMessage += OnReceiveMessage;
             _connection.Error += ConnectionOnError;
@@ -229,23 +230,23 @@ namespace System.IO.SharedMemory
 
     static class SharedMemoryClientFactory
     {
-        public static SharedMemoryStreamWrapper<TRead, TWrite> Connect<TRead, TWrite>(string pipeName,string serverName)
+        public static SharedMemoryStreamWrapper<TRead, TWrite> Connect<TRead, TWrite>(string pipeName)
             where TRead : class
             where TWrite : class
         {
-            return new SharedMemoryStreamWrapper<TRead, TWrite>(CreateAndConnectPipe(pipeName,serverName));
+            return new SharedMemoryStreamWrapper<TRead, TWrite>(CreateAndConnect(pipeName));
         }
 
-        public static NamedPipeClientStream CreateAndConnectPipe(string pipeName, string serverName)
+        public static SharedMemoryStream CreateAndConnect(string name)
         {
-            var pipe = CreatePipe(pipeName, serverName);
-            pipe.Connect();
-            return pipe;
+            var sms = Create(name);
+            sms.Connect();
+            return sms;
         }
 
-        private static NamedPipeClientStream CreatePipe(string pipeName,string serverName)
+        private static SharedMemoryStream Create(string name)
         {
-            return new NamedPipeClientStream(serverName, pipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.WriteThrough);
+            return new SharedMemoryStream(name);
         }
     }
 }
